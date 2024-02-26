@@ -1,0 +1,54 @@
+package spec
+CREATE OR REPLACE PACKAGE UNIVERSITY.student_gpa_pkg IS
+    g_student_id NUMBER;
+    
+    PROCEDURE init_student_id(student_id IN Student_grades.student_id%TYPE);
+    FUNCTION calculate_student_gpa RETURN NUMBER;
+    
+END ;
+-------------------------------------------------------------------
+package body
+CREATE OR REPLACE PACKAGE BODY UNIVERSITY.student_gpa_pkg IS
+    FUNCTION calculate_student_gpa RETURN NUMBER IS
+        v_total_credits NUMBER := 0;
+        v_total_grade_points NUMBER := 0;
+        v_gpa NUMBER;
+        CURSOR grade_cursor IS
+            SELECT * from S_GRADE;
+        
+    BEGIN
+        FOR gra_rec IN grade_cursor LOOP
+
+            CASE gra_rec.GRADES
+                WHEN 'A' THEN
+                    v_total_grade_points := v_total_grade_points + (4.0 * gra_rec.CREDIT);
+                WHEN 'B' THEN
+                    v_total_grade_points := v_total_grade_points + (3.0 * gra_rec.CREDIT);
+                WHEN 'C' THEN
+                    v_total_grade_points := v_total_grade_points + (2.0 * gra_rec.CREDIT);
+                WHEN 'D' THEN
+                    v_total_grade_points := v_total_grade_points + (1.0 * gra_rec.CREDIT);
+                WHEN 'F' THEN
+                    v_total_grade_points := v_total_grade_points + (0.0 * gra_rec.CREDIT);
+            END CASE;
+
+            v_total_credits := v_total_credits + gra_rec.CREDIT;
+        END LOOP;
+
+        IF v_total_credits > 0 THEN
+            v_gpa := v_total_grade_points / v_total_credits;
+            
+            RETURN v_gpa;
+        ELSE
+            
+            RETURN 0.0;
+        END IF;
+    END ;
+
+    PROCEDURE init_student_id(student_id IN Student_grades.student_id%TYPE) IS
+    BEGIN
+        
+        g_student_id := student_id;
+    END ;
+
+END ;

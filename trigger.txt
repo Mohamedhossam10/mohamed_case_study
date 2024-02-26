@@ -1,0 +1,14 @@
+CREATE OR REPLACE TRIGGER UNIVERSITY.S_G_T
+FOR INSERT OR UPDATE  ON UNIVERSITY.STUDENT_GRADES 
+COMPOUND TRIGGER
+     student_ids number;
+      after each row is
+      begin
+        student_ids := :new.student_id;
+      end after each row;
+      
+      after statement is
+      begin
+       CALCULATE_STUDENT_GPA(student_ids);
+      end after statement;
+END;
